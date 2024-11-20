@@ -24,9 +24,15 @@ interface BoardColumnProps {
   column: Column;
   tasks: Task[];
   isOverlay?: boolean;
+  setTasks: React.Dispatch<React.SetStateAction<Task[]>>;
 }
 
-export function BoardColumn({ column, tasks, isOverlay }: BoardColumnProps) {
+export function BoardColumn({
+  column,
+  tasks,
+  isOverlay,
+  setTasks,
+}: BoardColumnProps) {
   const tasksIds = useMemo(() => {
     return tasks.map((task) => task.id);
   }, [tasks]);
@@ -34,7 +40,7 @@ export function BoardColumn({ column, tasks, isOverlay }: BoardColumnProps) {
   const {
     setNodeRef,
     attributes,
-    listeners,
+    // listeners,
     transform,
     transition,
     isDragging,
@@ -92,7 +98,12 @@ export function BoardColumn({ column, tasks, isOverlay }: BoardColumnProps) {
         <CardContent className="flex flex-grow flex-col gap-2 p-2">
           <SortableContext items={tasksIds}>
             {tasks.map((task) => (
-              <KanbanTaskCard key={task.id} task={task} />
+              <KanbanTaskCard
+                initialTasks={tasks}
+                setTasks={setTasks}
+                key={task.id}
+                task={task}
+              />
             ))}
           </SortableContext>
         </CardContent>

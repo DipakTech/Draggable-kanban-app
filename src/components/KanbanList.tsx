@@ -76,6 +76,8 @@ export function KanbanBoard() {
   const [activeColumn, setActiveColumn] = useState<Column | null>(null);
   const [activeTask, setActiveTask] = useState<Task | null>(null);
 
+  console.log(tasks);
+
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [newTaskContent, setNewTaskContent] = useState("");
   const [selectedColumnId, setSelectedColumnId] = useState<ColumnId>("todo");
@@ -229,6 +231,7 @@ export function KanbanBoard() {
                 key={col.id}
                 column={col}
                 tasks={tasks.filter((task) => task.columnId === col.id)}
+                setTasks={setTasks}
               />
             ))}
           </SortableContext>
@@ -244,9 +247,17 @@ export function KanbanBoard() {
                   tasks={tasks.filter(
                     (task) => task.columnId === activeColumn.id,
                   )}
+                  setTasks={setTasks}
                 />
               )}
-              {activeTask && <KanbanTaskCard task={activeTask} isOverlay />}
+              {activeTask && (
+                <KanbanTaskCard
+                  initialTasks={tasks}
+                  setTasks={setTasks}
+                  task={activeTask}
+                  isOverlay
+                />
+              )}
             </DragOverlay>,
             document.body,
           )}

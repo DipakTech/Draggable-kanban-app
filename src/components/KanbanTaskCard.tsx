@@ -1,10 +1,15 @@
 import type { UniqueIdentifier } from "@dnd-kit/core";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardFooter,
+  CardHeader,
+} from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { cva } from "class-variance-authority";
-import { GripVertical } from "lucide-react";
+import { Delete, GripVertical, UserRoundPen } from "lucide-react";
 import { ColumnId } from "./KanbanList";
 
 export interface Task {
@@ -16,6 +21,8 @@ export interface Task {
 interface TaskCardProps {
   task: Task;
   isOverlay?: boolean;
+  initialTasks: Task[];
+  setTasks: React.Dispatch<React.SetStateAction<Task[]>>;
 }
 
 export type TaskType = "Task";
@@ -25,7 +32,13 @@ export interface TaskDragData {
   task: Task;
 }
 
-export function KanbanTaskCard({ task, isOverlay }: TaskCardProps) {
+export function KanbanTaskCard({
+  task,
+  isOverlay,
+  initialTasks,
+  setTasks,
+}: TaskCardProps) {
+  console.log(initialTasks);
   const {
     setNodeRef,
     attributes,
@@ -58,6 +71,11 @@ export function KanbanTaskCard({ task, isOverlay }: TaskCardProps) {
     },
   });
 
+  const handleDelete = () => {
+    const updatedTasks = initialTasks.filter((t) => t.id !== task.id);
+    setTasks([...initialTasks, ...updatedTasks]);
+  };
+
   return (
     <Card
       ref={setNodeRef}
@@ -80,6 +98,21 @@ export function KanbanTaskCard({ task, isOverlay }: TaskCardProps) {
       <CardContent className="px-3 pt-3 pb-6 text-left whitespace-pre-wrap">
         {task.content}
       </CardContent>
+      <CardFooter className="flex items-end justify-end gap-3  py-3  border-secondary">
+        <div className="border-t-2 mt-2 py-2">
+          <Button
+            onClick={handleDelete}
+            className="p-0 hover:bg-red-500 group"
+            variant="ghost"
+          >
+            <Delete className="m-2 text-red-500  group-hover:text-white" />
+          </Button>
+
+          <Button variant="ghost" className="p-0">
+            <UserRoundPen className="m-2" />
+          </Button>
+        </div>
+      </CardFooter>
     </Card>
   );
 }

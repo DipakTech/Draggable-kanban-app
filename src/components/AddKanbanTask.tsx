@@ -21,6 +21,7 @@ import {
 import { ColumnId } from "./KanbanList";
 import { Task } from "./KanbanTaskCard";
 import { saveTasksToLocalStorage } from "@/utils/saveToLocalstorage";
+import { taskSchema } from "@/validations/taskSchema";
 
 interface AddKanbanTaskDialogProps {
   isModalOpen: boolean;
@@ -56,40 +57,39 @@ export function AddKanbanTaskDialog({
     setErrors({});
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
-    const newErrors: typeof errors = {};
-    if (!newTaskContent.trim()) {
-      newErrors.content = "Task content is required";
-    }
-    if (!selectedColumnId) {
-      newErrors.columnId = "Column selection is required";
-    }
+    const validationResult = taskSchema.safeParse({
+      content: newTaskContent,
+      columnId: selectedColumnId,
+    });
 
-    if (Object.keys(newErrors).length > 0) {
-      setErrors(newErrors);
-      toast.error("Please fill in all required fields");
+    if (!validationResult.success) {
+      const zodErrors = validationResult.error.format();
+      setErrors({
+        content: zodErrors.content?._errors[0],
+        columnId: zodErrors.columnId?._errors[0],
+      });
       return;
     }
 
     try {
+      const newTask: Task = {
+        id: Date.now().toString(),
+        columnId: selectedColumnId,
+        content: newTaskContent,
+      };
+
+      const updatedTasks = [...initialTasks, newTask];
+      setTasks(updatedTasks);
+      saveTasksToLocalStorage(updatedTasks);
+
+      toast.success("Task added successfully!");
       resetForm();
       setIsModalOpen(false);
-      setTasks([
-        ...initialTasks,
-        { id: Date.now(), columnId: selectedColumnId, content: newTaskContent },
-      ]);
-
-      const updatedTasks = [
-        ...initialTasks,
-        { id: Date.now(), columnId: selectedColumnId, content: newTaskContent },
-      ];
-      saveTasksToLocalStorage(updatedTasks);
-      toast.success("Task added successfully!");
     } catch (error) {
       console.error(error);
-      toast.error("Failed to add task. Please try again later.");
     }
   };
 
